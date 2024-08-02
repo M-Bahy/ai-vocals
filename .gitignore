@@ -1,0 +1,3 @@
+server/pretrained_models/*
+server/server/__pycache__/*
+*.mp3
