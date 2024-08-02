@@ -18,10 +18,15 @@ def download_audio_from_youtube(video_url, output_filename="audio"):
     }
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+
+        info_dict = ydl.extract_info(video_url, download=False)
+        video_title = info_dict.get("title", None)
         ydl.download([video_url])
 
+    return video_title
 
-def remove_music(audio_filename="audio.mp3"):
+
+def remove_music(video_title, audio_filename="audio.mp3"):
     command = [
         "spleeter",
         "separate",
@@ -36,13 +41,18 @@ def remove_music(audio_filename="audio.mp3"):
         os.remove(audio_filename)
     vocals_path = os.path.join("audio", "vocals.wav")
     if os.path.exists(vocals_path):
-        subprocess.run(["ffmpeg", "-i", vocals_path, "audio.mp3"], check=True)
+        subprocess.run(["ffmpeg", "-i", vocals_path, video_title + ".mp3"], check=True)
     if os.path.exists("audio"):
         shutil.rmtree("audio")
 
 
 def get_vocals(video_url):
-    if os.path.exists("audio.mp3"):
-        os.remove("audio.mp3")
-    download_audio_from_youtube(video_url)
-    remove_music()
+
+    files = os.listdir('.')
+    mp3_files = [file for file in files if file.endswith('.mp3')]
+    for mp3_file in mp3_files:
+        if os.path.exists(mp3_file):
+            os.remove(mp3_file)
+
+    video_title = download_audio_from_youtube(video_url)
+    remove_music(video_title)
