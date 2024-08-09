@@ -1,6 +1,7 @@
 import yt_dlp
 import subprocess
 import os
+import re
 import shutil
 
 
@@ -41,7 +42,9 @@ def remove_music(video_title, audio_filename="audio.mp3"):
         os.remove(audio_filename)
     vocals_path = os.path.join("audio", "vocals.wav")
     if os.path.exists(vocals_path):
-        subprocess.run(["ffmpeg", "-i", vocals_path, video_title + ".mp3"], check=True)
+        invalid_chars_pattern = r'[\/:*?"<>|\\]'
+        sanitized_video_title = re.sub(invalid_chars_pattern, '_', video_title)
+        subprocess.run(["ffmpeg", "-i", vocals_path, sanitized_video_title + ".mp3"], check=True)
     if os.path.exists("audio"):
         shutil.rmtree("audio")
 
